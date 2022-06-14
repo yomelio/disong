@@ -28,13 +28,11 @@ class Music(commands.Cog):
                 player.bound_channel = ctx.channel
 
             if player.channel_id == ctx.channel.id:
-                return await ctx.send(
-                    "Player is already connected to your voice channel."
-                )
-
-            return await ctx.send(
-                f"Player is connected to a different voice channel. Can' join this."
-            )
+                embed = discord.Embed(title='Terror X Manager', description='I am already connected to your channel', color=0x2f3136)
+                return await ctx.send(embed=embed)
+            
+            embed = discord.Embed(title='Terror X Manager', description='I am already connected to a channel, cant join this', color=0x2f3136)
+            return await ctx.send(embed=embed)
 
         channel = ctx.author.voice.channel
         self.bot.voice_users[ctx.author.id] = channel.id
@@ -54,6 +52,7 @@ class Music(commands.Cog):
         """Destroy the player"""
         player: WebPlayer = self.bot.wavelink.get_player(ctx.guild.id, cls=WebPlayer)
         await player.destroy()
+        await ctx.send('Left the Channel and Destroyed Song Queue')
 
     @commands.command(name="play", aliases=["p"])
     @voice_connected()
@@ -66,10 +65,11 @@ class Music(commands.Cog):
 
         if ctx.channel != player.bound_channel:
             return await ctx.send(
-                f"Player is bounded to {player.bound_channel.mention}", delete_after=5
+                f"Bot is bounded to {player.bound_channel.mention}", delete_after=5
             )
 
-        msg = await ctx.send(f"Searching for `{query}` :mag_right:")
+        embed = discord.Embed(description=f"Searching for `{query}`", title="Terror X Manager", color=0x2f3136)
+        msg = await ctx.send(embed=embed)
         query = query.strip("<>")
         if not self.URL_REG.match(query):
             query = f"ytsearch:{query}"
@@ -77,7 +77,8 @@ class Music(commands.Cog):
         tracks = await self.bot.wavelink.get_tracks(query)
 
         if not tracks:
-            return await msg.edit(content="Could not find any song with that query.")
+            nembed = discord.Embed(color=0x2f3136, description='I was not able to find the song. Pls provide me its link', title='Terror X Manager')
+            return await msg.edit(embed=nembed)
 
         if isinstance(tracks, wavelink.TrackPlaylist):
             for track in tracks.tracks:
@@ -104,7 +105,7 @@ class Music(commands.Cog):
 
         if ctx.channel != player.bound_channel:
             return await ctx.send(
-                f"Player is bounded to {player.bound_channel.mention}", delete_after=5
+                f"Bot is bounded to {player.bound_channel.mention}", delete_after=5
             )
 
         current_loop = player.loop
@@ -125,17 +126,17 @@ class Music(commands.Cog):
 
         if ctx.channel != player.bound_channel:
             return await ctx.send(
-                f"Player is bounded to {player.bound_channel.mention}", delete_after=5
+                f"Bot is bounded to {player.bound_channel.mention}", delete_after=5
             )
 
         if player.is_playing:
             if player.is_paused:
-                return await ctx.send("Player is already paused.")
+                return await ctx.send("Bot is already paused and not playing.")
 
             await player.set_pause(pause=True)
-            return await ctx.send("Player is now paused.")
+            return await ctx.send("Song is now paused, type `$resume` to resume.")
 
-        await ctx.send("Player is not playing anything.")
+        await ctx.send("Bot is not playing anything.")
 
     @commands.command()
     @player_connected()
@@ -147,17 +148,17 @@ class Music(commands.Cog):
 
         if ctx.channel != player.bound_channel:
             return await ctx.send(
-                f"Player is bounded to {player.bound_channel.mention}", delete_after=5
+                f"Bot is bounded to {player.bound_channel.mention}", delete_after=5
             )
 
         if player.is_playing:
             if not player.is_paused:
-                return await ctx.send("Player is not paused.")
+                return await ctx.send("Song is not paused.")
 
             await player.set_pause(pause=False)
-            return await ctx.send("Player is now resumed.")
+            return await ctx.send("Song is now resumed and playing.")
 
-        await ctx.send("Player is not playing anything.")
+        await ctx.send("Bot is not playing anything.")
 
     @commands.command()
     @voice_connected()
@@ -169,7 +170,7 @@ class Music(commands.Cog):
 
         if ctx.channel != player.bound_channel:
             return await ctx.send(
-                f"Player is bounded to {player.bound_channel.mention}", delete_after=5
+                f"Bot is bounded to {player.bound_channel.mention}", delete_after=5
             )
 
         if player.is_playing:
@@ -187,10 +188,10 @@ class Music(commands.Cog):
                 return await ctx.send(f"Player has been seeked {seconds} seconds.")
 
             return await ctx.send(
-                "Player is paused. Resume the player to use this command."
+                "Song is paused. Resume the player to use this command."
             )
 
-        await ctx.send("Player is not playing anything.")
+        await ctx.send("Bot is not playing anything.")
 
     @commands.command(aliases=["vol"])
     @voice_connected()
@@ -202,7 +203,7 @@ class Music(commands.Cog):
 
         if ctx.channel != player.bound_channel:
             return await ctx.send(
-                f"Player is bounded to {player.bound_channel.mention}", delete_after=5
+                f"Bot is bounded to {player.bound_channel.mention}", delete_after=5
             )
 
         if vol < 0:
@@ -224,7 +225,7 @@ class Music(commands.Cog):
 
         if ctx.channel != player.bound_channel:
             return await ctx.send(
-                f"Player is bounded to {player.bound_channel.mention}", delete_after=5
+                f"Bot is bounded to {player.bound_channel.mention}", delete_after=5
             )
 
         valid_types = ["NONE", "CURRENT", "PLAYLIST"]
@@ -255,7 +256,7 @@ class Music(commands.Cog):
 
         if ctx.channel != player.bound_channel:
             return await ctx.send(
-                f"Player is bounded to {player.bound_channel.mention}", delete_after=5
+                f"Bot is bounded to {player.bound_channel.mention}", delete_after=5
             )
 
         if not player.current:
@@ -273,7 +274,7 @@ class Music(commands.Cog):
 
         if ctx.channel != player.bound_channel:
             return await ctx.send(
-                f"Player is bounded to {player.bound_channel.mention}", delete_after=5
+                f"Bot is bounded to {player.bound_channel.mention}", delete_after=5
             )
 
         queue = player.queue._queue
@@ -281,7 +282,7 @@ class Music(commands.Cog):
             return await ctx.send("Nothing is in the queue.")
 
         embed = discord.Embed(color=discord.Color(0x2F3136))
-        embed.set_author(name="Queue", icon_url="https://cdn.shahriyar.dev/list.png")
+        embed.set_author(name="Queue", icon_url=f"{ctx.author.avatar_url}")
 
         tracks = ""
         if player.loop == "CURRENT":
@@ -309,7 +310,7 @@ class Music(commands.Cog):
 
         if ctx.channel != player.bound_channel:
             return await ctx.send(
-                f"Player is bounded to {player.bound_channel.mention}", delete_after=5
+                f"Bot is bounded to {player.bound_channel.mention}", delete_after=5
             )
 
         eqs = {
